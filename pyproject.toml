@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ODConvert"
+version = "0.0.0"
+description = "Convert object detection dataset formats"
+authors = [{ name = "Jack Devey", email = "jack.devey@bcu.ac.uk" }]
+dependencies = []
+
+[project.scripts]
+odc = "ODConvert.__main__:main"
