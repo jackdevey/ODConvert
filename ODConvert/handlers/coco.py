@@ -1,5 +1,5 @@
 from pathlib import Path
-from ODConvert.handlers.base import DatasetPartition, DatasetAnnotation, DatasetClass, DatasetImage, BoundingBox, DatasetHandler
+from ODConvert.core import DatasetPartition, DatasetAnnotation, DatasetClass, DatasetImage, BoundingBox, DatasetHandler
 import json
 from typing import List, Tuple, Optional
 

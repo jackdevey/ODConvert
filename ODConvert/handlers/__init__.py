@@ -1,2 +1,2 @@
-from ODConvert.handlers.base import *
-from ODConvert.handlers.dataset import *
+# Import COCO dataset handler and partition classes
+from ODConvert.handlers.coco import COCODatasetHandler, COCODatasetPartition
