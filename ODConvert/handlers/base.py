@@ -1,7 +1,7 @@
 from pathlib import Path
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 
 
 @dataclass(frozen=True)
@@ -80,34 +80,26 @@ class DatasetPartition:
 
 class DatasetHandler:
 
-    def __init__(self, partitions: List[DatasetPartition]):
-        # Find all partitions in the dataset
-        # and store them in the instance
-        self.__partitions = partitions
+    def __init__(self, classes: List[DatasetClass], partitions: List[DatasetPartition]):
+        # Convert the provided classes and partitions to dictionaries
+        # for faster lookup
+        self.__classes: Dict[int, DatasetClass] = {
+            cls.id: cls for cls in classes
+        }
+        self.__partitions: Dict[str, DatasetPartition] = {
+            partition.name: partition for partition in partitions
+        }
 
     def get_classes(self) -> List[DatasetClass]:
         """
         Returns the list of classes in the dataset.
         :return: List[DatasetClass]
         """
-        # Check if classes are already loaded
-        # and return them if so
-        if getattr(self, "__classes", None) is not None:
-            return self.__classes
-        # Otherwise, load the classes
-        # and store them in the instance
-        self.__classes = self.__get_classes()
-        return self.__classes
-
-    @abstractmethod
-    def __get_classes(self) -> List[DatasetClass]:
-        pass
+        return self.__classes.values()
 
     def get_partitions(self) -> List[DatasetPartition]:
         """
         Returns the list of partitions in the dataset.
         :return: List[DatasetPartition]
         """
-        # Partitions are already loaded in the constructor
-        # so we just return them
-        return self.__partitions
+        return self.__partitions.values()

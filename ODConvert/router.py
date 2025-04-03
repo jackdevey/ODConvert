@@ -44,4 +44,4 @@ def inspect(path: str):
 
 
 if __name__ == "__main__":
-    inspect(path=".demo/train")
+    inspect(path=".demo")

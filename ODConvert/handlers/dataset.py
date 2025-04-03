@@ -1,7 +1,7 @@
 from pathlib import Path
 from dataclasses import dataclass
 from abc import abstractmethod
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 
 
 @dataclass(frozen=True)
@@ -78,27 +78,6 @@ class DatasetPartition:
         images = self.get_images()
         annotations = self.get_annotations()
         return len(images), len(annotations)
-
-
-class DatasetHandler:
-
-    def get_classes(self) -> List[DatasetClass]:
-        """
-        Returns the list of classes in the dataset.
-        :return: List[DatasetClass]
-        """
-        # Check if classes are already loaded
-        # and return them if so
-        if getattr(self, "__classes", None) is not None:
-            return self.__classes
-        # Otherwise, load the classes
-        # and store them in the instance
-        self.__classes = self.__get_classes()
-        return self.__classes
-
-    @abstractmethod
-    def __get_classes(self) -> List[DatasetClass]:
-        pass
 
 
 if __name__ == "__main__":

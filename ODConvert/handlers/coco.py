@@ -11,28 +11,54 @@ class COCODatasetHandler(DatasetHandler):
         self.image_dir = image_dir
         # Find all partitions in the dataset
         partitions = self.__find_partitions()
-        super().__init__(partitions)
-
-    def __get_classes(self):
-        # TODO: for now will jsut return the classes from the partition
-        # but in the future we will have to have multiple partitions - coco
-        # will need to check for the same classes over all partitions
-        return self.__partitions[0].get_classes()
+        # Check the first partition for classes
+        if not partitions:
+            raise ValueError("No partitions found in the dataset.")
+        # Check if the first partition has classes
+        classes = partitions[0].get_classes()
+        if classes is None:
+            raise ValueError("No classes found in the dataset.")
+        # Initialize the DatasetHandler with the classes and partitions
+        # from the first partition
+        super().__init__(classes, partitions)
 
     def __find_partitions(self):
         partitions: List[DatasetPartition] = []
-        for item in self.image_dir.iterdir():
-            if item.is_dir():
-                # Treat all subdirectories as partitions
-                # and create a DatasetPartition object for each
-                partition = COCODatasetPartition(
-                    name=item.name,
-                    image_dir=item,
-                    annotation_file=item / "_annotations.coco.json"
-                )
-                partitions.append(partition)
-        # Return the list of partitions
+        # COCO datasets should provide annotations for each
+        # partition in the /annotations directory
+        if (self.image_dir / "annotations").exists():
+            for item in (self.image_dir / "annotations").iterdir():
+                # Check if the item is a file and ends with .json
+                if item.is_file() and item.suffix == ".json":
+                    # Try to extract the partition name from the file name,
+                    # typically this comes after the last underscore
+                    name = item.stem.split("_")[-1]
+                    # Treat the file as an annotation file
+                    partition = COCODatasetPartition(
+                        name=name,
+                        image_dir=self.image_dir,
+                        annotation_file=item
+                    )
+                    partitions.append(partition)
+        # TODO: Add support for occurences where annotations
+        # are stored with images in the partition directories.
         return partitions
+
+        # # Iterate through all items in the annotation directory
+        # # and check if they are directories
+
+        # for item in self.image_dir.iterdir():
+        #     if item.is_dir():
+        #         # Treat all subdirectories as partitions
+        #         # and create a DatasetPartition object for each
+        #         partition = COCODatasetPartition(
+        #             name=item.name,
+        #             image_dir=item,
+        #             annotation_file=item / "_annotations.coco.json"
+        #         )
+        #         partitions.append(partition)
+        # # Return the list of partitions
+        # return partitions
 
 
 class COCODatasetPartition(DatasetPartition):
