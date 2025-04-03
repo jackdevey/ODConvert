@@ -1,6 +1,38 @@
 from pathlib import Path
-from base import DatasetPartition, DatasetAnnotation, DatasetClass, DatasetImage, BoundingBox
+from ODConvert.handlers.base import DatasetPartition, DatasetAnnotation, DatasetClass, DatasetImage, BoundingBox, DatasetHandler
 import json
+from typing import List, Tuple, Optional
+
+
+class COCODatasetHandler(DatasetHandler):
+
+    def __init__(self, image_dir: Path):
+        # Initialize the dataset partition
+        self.image_dir = image_dir
+        # Find all partitions in the dataset
+        partitions = self.__find_partitions()
+        super().__init__(partitions)
+
+    def __get_classes(self):
+        # TODO: for now will jsut return the classes from the partition
+        # but in the future we will have to have multiple partitions - coco
+        # will need to check for the same classes over all partitions
+        return self.__partitions[0].get_classes()
+
+    def __find_partitions(self):
+        partitions: List[DatasetPartition] = []
+        for item in self.image_dir.iterdir():
+            if item.is_dir():
+                # Treat all subdirectories as partitions
+                # and create a DatasetPartition object for each
+                partition = COCODatasetPartition(
+                    name=item.name,
+                    image_dir=item,
+                    annotation_file=item / "_annotations.coco.json"
+                )
+                partitions.append(partition)
+        # Return the list of partitions
+        return partitions
 
 
 class COCODatasetPartition(DatasetPartition):
