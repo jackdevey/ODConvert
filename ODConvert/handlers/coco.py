@@ -1,5 +1,5 @@
 from pathlib import Path
-from ODConvert.core import DatasetPartition, DatasetAnnotation, DatasetClass, DatasetImage, BoundingBox, DatasetHandler
+from ODConvert.core import DatasetPartition, DatasetAnnotation, DatasetClass, DatasetImage, BoundingBox, DatasetHandler, DatasetType
 import json
 from typing import List, Tuple, Optional
 
@@ -7,7 +7,7 @@ from typing import List, Tuple, Optional
 class COCODatasetHandler(DatasetHandler):
 
     def __init__(self, image_dir: Path):
-        # Initialize the dataset partition
+        # Initialise the dataset partition
         self.image_dir = image_dir
         # Find all partitions in the dataset
         partitions = self.__find_partitions()
@@ -18,9 +18,9 @@ class COCODatasetHandler(DatasetHandler):
         classes = partitions[0].get_classes()
         if classes is None:
             raise ValueError("No classes found in the dataset.")
-        # Initialize the DatasetHandler with the classes and partitions
+        # Initialise the DatasetHandler with the classes and partitions
         # from the first partition
-        super().__init__(classes, partitions)
+        super().__init__(DatasetType.COCO, classes, partitions)
 
     def __find_partitions(self):
         partitions: List[DatasetPartition] = []
@@ -110,15 +110,19 @@ class COCODatasetPartition(DatasetPartition):
         # Check if images are already loaded,
         # and return them if so
         if getattr(self, "__images", None) is not None:
+            print("DBG: Using cached images")
             return self.__images
 
-        return [
-            DatasetImage(
+        return {
+            image["id"]: DatasetImage(
                 id=image["id"],
                 path=self.image_dir / image["file_name"],
             )
             for image in self.raw["images"]
-        ]
+        }
+
+    def get_image(self, id: int):
+        return self.__images[id]
 
     def get_annotations(self):
         # Check if annotations are already loaded,
@@ -132,6 +136,12 @@ class COCODatasetPartition(DatasetPartition):
             if cls is None:
                 raise ValueError(
                     f"Class with ID {annotation['category_id']} not found.")
+            # Lookup image by ID
+            img = self.get_image(annotation["image_id"])
+            if img is None:
+                raise ValueError(
+                    f"Image with ID {annotation['image_id']} not found."
+                )
             # Construct BoundingBox object
             bbox = BoundingBox.from_center(
                 annotation["bbox"][0], annotation["bbox"][1], annotation["bbox"][2], annotation["bbox"][3])
@@ -140,6 +150,7 @@ class COCODatasetPartition(DatasetPartition):
                 id=annotation["id"],
                 cls=cls,
                 bbox=bbox,
+                image=img,
                 iscrowd=0
             )
 
@@ -149,12 +160,3 @@ class COCODatasetPartition(DatasetPartition):
             # for all annotations in the raw data
             for annotation in self.raw["annotations"]
         ]
-
-
-if __name__ == "__main__":
-    # Example usage
-    partition = COCODatasetPartition("train", Path(
-        "/Users/jack/Developer/ODConvert/.demo/train/"), Path("/Users/jack/Developer/ODConvert/.demo/train/_annotations.coco.json"))
-    print(partition.get_classes())  # Output: train
-    print(partition.image_dir)  # Output: /path/to/images
-    print(partition.get_images())  # Output: /path/to/images/image1.jpg

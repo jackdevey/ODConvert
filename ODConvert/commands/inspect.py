@@ -4,6 +4,8 @@ from pathlib import Path
 
 from ODConvert.handlers.coco import COCODatasetHandler
 
+import ODConvert.core
+
 from rich.columns import Columns
 
 import fire
@@ -14,19 +16,19 @@ def inspect(path: str):
     # at the first instance
     path: Path = Path(path)
 
-    print("Inspecting path...")
-
     if not path.is_dir() or not path.exists():
         # If the path is not a directory, return False
         raise fire.core.FireError(f"Path {path} is not a valid directory")
 
-    dataset = COCODatasetHandler(path)
+    dataset = ODConvert.core.autodetect(path)
 
     dps = dataset.get_partitions()
 
     classes = dataset.get_classes()
 
-    print(f"full path: {path.absolute()}")
+    # Dataset details
+    print(f"Path: {path.absolute()}")
+    print(f"Type: {dataset.get_type().color_encoded_str()}")
     # Classes
     print()
     print(f"[bold]Detected {len(classes)} classes:[/bold]")

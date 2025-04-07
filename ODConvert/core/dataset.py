@@ -2,8 +2,42 @@ from dataclasses import dataclass
 from abc import abstractmethod
 from typing import List, Optional, Tuple, Dict
 from pathlib import Path
+from enum import Enum
 
 from ODConvert.core import BoundingBox
+
+
+class DatasetType(Enum):
+    YOLO = "YOLO"
+    COCO = "COCO"
+    VOC = "VOC"
+
+    def __str__(self):
+        """
+        Returns the string representation of the dataset type.
+        :return: str
+        """
+        return self.value
+
+    def color(self) -> str:
+        """
+        Returns the frontend color associated with the dataset type.
+        :return: str
+        """
+        match self:
+            case DatasetType.YOLO:
+                return "green"
+            case DatasetType.COCO:
+                return "orange3"
+            case DatasetType.VOC:
+                return "red"
+
+    def color_encoded_str(self) -> str:
+        """
+        Returns the string representation of the dataset type with color encoding.
+        :return: str
+        """
+        return f"[{self.color()}]{self}[/{self.color()}]"
 
 
 @dataclass(frozen=True)
@@ -14,17 +48,18 @@ class DatasetClass:
 
 
 @dataclass(frozen=True)
+class DatasetImage:
+    id: int | None
+    path: Path
+
+
+@dataclass(frozen=True)
 class DatasetAnnotation:
     id: int | None
     cls: DatasetClass
     bbox: BoundingBox
+    image: DatasetImage
     iscrowd: int
-
-
-@dataclass(frozen=True)
-class DatasetImage:
-    id: int | None
-    path: Path
 
 
 class DatasetPartition:
@@ -40,7 +75,7 @@ class DatasetPartition:
         pass
 
     @abstractmethod
-    def get_images(self) -> List[DatasetImage]:
+    def get_images(self) -> Dict[int, DatasetImage]:
         pass
 
     def stats(self) -> Tuple[int, int]:
@@ -55,7 +90,9 @@ class DatasetPartition:
 
 class DatasetHandler:
 
-    def __init__(self, classes: List[DatasetClass], partitions: List[DatasetPartition]):
+    def __init__(self, typ: DatasetType, classes: List[DatasetClass], partitions: List[DatasetPartition]):
+        # Set the dataset type
+        self.__type: DatasetType = typ
         # Convert the provided classes and partitions to dictionaries
         # for faster lookup
         self.__classes: Dict[int, DatasetClass] = {
@@ -64,6 +101,13 @@ class DatasetHandler:
         self.__partitions: Dict[str, DatasetPartition] = {
             partition.name: partition for partition in partitions
         }
+
+    def get_type(self) -> DatasetType:
+        """
+        Returns the type of the dataset.
+        :return: DatasetType
+        """
+        return self.__type
 
     def get_classes(self) -> List[DatasetClass]:
         """
