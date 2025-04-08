@@ -1,7 +1,9 @@
 from pathlib import Path
-from ODConvert.core import DatasetPartition, DatasetAnnotation, DatasetClass, DatasetImage, BoundingBox, DatasetHandler, DatasetType
+from ODConvert.core import DatasetPartition, DatasetAnnotation, DatasetClass
+from ODConvert.core import DatasetImage, BoundingBox, DatasetHandler
+from ODConvert.core import DatasetType
 import json
-from typing import List, Tuple, Optional
+from typing import List
 from uuid import uuid4
 
 
@@ -146,7 +148,11 @@ class COCODatasetPartition(DatasetPartition):
                 )
             # Construct BoundingBox object
             bbox = BoundingBox.from_center(
-                annotation["bbox"][0], annotation["bbox"][1], annotation["bbox"][2], annotation["bbox"][3])
+                annotation["bbox"][0],
+                annotation["bbox"][1],
+                annotation["bbox"][2],
+                annotation["bbox"][3]
+            )
             # Construct DatasetAnnotation object
             return DatasetAnnotation(
                 id=annotation["id"],

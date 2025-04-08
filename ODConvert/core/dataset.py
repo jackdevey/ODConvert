@@ -34,7 +34,8 @@ class DatasetType(Enum):
 
     def color_encoded_str(self) -> str:
         """
-        Returns the string representation of the dataset type with color encoding.
+        Returns the string representation of the dataset type
+        with color encoding.
         :return: str
         """
         return f"[{self.color()}]{self}[/{self.color()}]"
@@ -90,7 +91,11 @@ class DatasetPartition:
 
 class DatasetHandler:
 
-    def __init__(self, typ: DatasetType, classes: List[DatasetClass], partitions: List[DatasetPartition]):
+    def __init__(self,
+                 typ: DatasetType,
+                 classes: List[DatasetClass],
+                 partitions: List[DatasetPartition]
+                 ):
         # Set the dataset type
         self.__type: DatasetType = typ
         # Convert the provided classes and partitions to dictionaries

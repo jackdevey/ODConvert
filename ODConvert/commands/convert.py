@@ -1,6 +1,5 @@
 from rich import print
 from rich.prompt import Confirm
-from rich.progress import Progress
 
 from pathlib import Path
 
@@ -23,7 +22,8 @@ def convert(path: str, to_type: str):
     except ValueError:
         # If the to_type is not a valid DatasetType, raise an error
         raise fire.core.FireError(
-            f"Invalid dataset type: {to_type}. Valid types are: {', '.join([t.value for t in ODConvert.core.DatasetType])}")
+            f"Invalid dataset type: {to_type}. Valid types are: "
+            f"{', '.join([t.value for t in ODConvert.core.DatasetType])}")
 
     if not path.is_dir() or not path.exists():
         # If the path is not a directory, return False
@@ -56,12 +56,14 @@ def convert(path: str, to_type: str):
         output_dir.mkdir(exist_ok=False)
     except FileExistsError:
         print(
-            f":warning: The planned output directory of {path.absolute()}_{to_type.value.lower()} already exists.")
+            f":warning: The planned output directory of "
+            f"{path.absolute()}_{to_type.value.lower()} already exists.")
         overide = Confirm.ask(
             "Do you want to override the existing directory?", default=False)
         if overide:
             print(
-                f"Overriding existing directory {path.absolute()}_{to_type.value.lower()}")
+                f"Overriding existing directory "
+                f"{path.absolute()}_{to_type.value.lower()}")
             # Remove the existing directory
             shutil.rmtree(output_dir)
             output_dir.mkdir()

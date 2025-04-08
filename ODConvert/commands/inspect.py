@@ -2,8 +2,6 @@ from rich import print
 
 from pathlib import Path
 
-from ODConvert.handlers.coco import COCODatasetHandler
-
 import ODConvert.core
 
 from rich.columns import Columns
@@ -37,7 +35,8 @@ def inspect(path: str):
     print()
     print(f"[bold]Detected {len(dps)} partitions:[/bold]")
     print(Columns(
-        [f"[magenta]{dp.name}[/magenta] → {dp.stats()[0]} images and {dp.stats()[1]} annotations" for dp in dps],
+        [
+            f"[magenta]{dp.name}[/magenta] → {dp.stats()[0]}"
+            f"images and {dp.stats()[1]} annotations" for dp in dps
+        ],
     ))
-    # print(f"[bold]Detected {len(images)} images[/bold]")
-    # print(f"[bold]Detected {len(annotations)} annotations[/bold]")

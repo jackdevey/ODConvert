@@ -44,7 +44,8 @@ def convert_to_yolo(dataset: DatasetHandler, base_path: Path):
         for image_with_annotations in images_with_annotations:
             # Copy the image to the partition images path
             image = images[image_with_annotations]
-            # Construct a new file name using the image ID and the original file extension
+            # Construct a new file name using the image ID and the original
+            # file extension
             new_file_name = f"{image.id}{image.path.suffix}"
             new_file_path = partition_images_path.joinpath(new_file_name)
             # Copy the image to the new file path
@@ -55,10 +56,11 @@ def convert_to_yolo(dataset: DatasetHandler, base_path: Path):
             # Write the annotations to the file
             with open(partition_labels_path.joinpath(
                     f"{image_with_annotations}.txt"), "w") as f:
-                for annotation in images_with_annotations[image_with_annotations]:
+                for annot in images_with_annotations[image_with_annotations]:
                     # Get the class ID and bounding box
-                    cls_id = annotation.cls.id
-                    bbox = annotation.bbox
+                    cls_id = annot.cls.id
+                    bbox = annot.bbox
                     # Write the annotation to the file
                     f.write(
-                        f"{cls_id} {bbox.x_center} {bbox.y_center} {bbox.width} {bbox.height}\n")
+                        f"{cls_id} {bbox.x_center} {bbox.y_center} "
+                        f"{bbox.width} {bbox.height}\n")
