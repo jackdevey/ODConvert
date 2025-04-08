@@ -1,6 +1,7 @@
 from ODConvert.core import DatasetHandler, DatasetAnnotation, DatasetType
 from typing import Dict, List
 from pathlib import Path
+import shutil
 
 
 def convert_to_yolo(dataset: DatasetHandler, base_path: Path):
@@ -41,6 +42,13 @@ def convert_to_yolo(dataset: DatasetHandler, base_path: Path):
             images_with_annotations[image_id].append(annotation)
 
         for image_with_annotations in images_with_annotations:
+            # Copy the image to the partition images path
+            image = images[image_with_annotations]
+            # Construct a new file name using the image ID and the original file extension
+            new_file_name = f"{image.id}{image.path.suffix}"
+            new_file_path = partition_images_path.joinpath(new_file_name)
+            # Copy the image to the new file path
+            shutil.copyfile(image.path, new_file_path)
             # Create the image annotation file
             partition_labels_path.joinpath(
                 f"{image_with_annotations}.txt").touch(exist_ok=True)

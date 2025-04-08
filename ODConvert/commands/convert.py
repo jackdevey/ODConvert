@@ -4,7 +4,7 @@ from rich.progress import Progress
 
 from pathlib import Path
 
-import time
+import shutil
 import fire
 import ODConvert.core
 
@@ -55,7 +55,18 @@ def convert(path: str, to_type: str):
         output_dir = Path(f"{path.absolute()}_{to_type.value.lower()}")
         output_dir.mkdir(exist_ok=False)
     except FileExistsError:
-        raise fire.core.FireError(
-            f"Output directory {output_dir} already exists. Please delete it or choose a different name.")
+        print(
+            f":warning: The planned output directory of {path.absolute()}_{to_type.value.lower()} already exists.")
+        overide = Confirm.ask(
+            "Do you want to override the existing directory?", default=False)
+        if overide:
+            print(
+                f"Overriding existing directory {path.absolute()}_{to_type.value.lower()}")
+            # Remove the existing directory
+            shutil.rmtree(output_dir)
+            output_dir.mkdir()
+        else:
+            raise fire.core.Fire(
+                f"Output directory {output_dir} already exists. ")
 
     convert_to_yolo(dataset, output_dir)

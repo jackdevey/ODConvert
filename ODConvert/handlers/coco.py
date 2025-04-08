@@ -2,13 +2,14 @@ from pathlib import Path
 from ODConvert.core import DatasetPartition, DatasetAnnotation, DatasetClass, DatasetImage, BoundingBox, DatasetHandler, DatasetType
 import json
 from typing import List, Tuple, Optional
+from uuid import uuid4
 
 
 class COCODatasetHandler(DatasetHandler):
 
-    def __init__(self, image_dir: Path):
+    def __init__(self, dir: Path):
         # Initialise the dataset partition
-        self.image_dir = image_dir
+        self.dir = dir
         # Find all partitions in the dataset
         partitions = self.__find_partitions()
         # Check the first partition for classes
@@ -26,20 +27,21 @@ class COCODatasetHandler(DatasetHandler):
         partitions: List[DatasetPartition] = []
         # COCO datasets should provide annotations for each
         # partition in the /annotations directory
-        if (self.image_dir / "annotations").exists():
-            for item in (self.image_dir / "annotations").iterdir():
+        if (self.dir / "annotations").exists():
+            for item in (self.dir / "annotations").iterdir():
                 # Check if the item is a file and ends with .json
                 if item.is_file() and item.suffix == ".json":
                     # Try to extract the partition name from the file name,
                     # typically this comes after the last underscore
-                    name = item.stem.split("_")[-1]
-                    # Treat the file as an annotation file
-                    partition = COCODatasetPartition(
+                    name = item.stem.split(
+                        "_")[-1] or f"unknown-{str(uuid4())[:8]}"
+                    # Create new COCODatasetPartition object
+                    # and append it to the list of partitions
+                    partitions.append(COCODatasetPartition(
                         name=name,
-                        image_dir=self.image_dir,
+                        image_dir=self.dir / "images",
                         annotation_file=item
-                    )
-                    partitions.append(partition)
+                    ))
         # TODO: Add support for occurences where annotations
         # are stored with images in the partition directories.
         return partitions
