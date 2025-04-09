@@ -1,47 +1,47 @@
-from ODConvert.core import DatasetHandler, DatasetAnnotation, DatasetType
+from ODConvert.core import DatasetAnnotation
 from typing import Dict, List
-from pathlib import Path
 import shutil
+from rich.progress import track
+
+from ODConvert.converters.base import DatasetConverter
 
 
-def convert_to_yolo(dataset: DatasetHandler, base_path: Path):
-    """
-    Convert a dataset to YOLO format.
-    :param dataset: The dataset to convert.
-    :return: None
-    """
-    # Check if the dataset is already in YOLO format
-    if dataset.get_type() == DatasetType.YOLO:
-        print("Dataset is already in YOLO format.")
-        return
+class YOLOConverter(DatasetConverter):
 
-    # Create the images and labels paths
-    images_path = base_path.joinpath("images")
-    labels_path = base_path.joinpath("labels")
+    def setup(self):
+        # Create the images and labels paths
+        self.images_path = self.path.joinpath("images")
+        self.labels_path = self.path.joinpath("labels")
 
-    for partition in dataset.get_partitions():
+    def additional_checks(self):
+        return True
+
+    def convert_partition(self, partition):
         # Create the directories for the partition
-        partition_images_path = images_path.joinpath(partition.name)
+        partition_images_path = self.images_path.joinpath(partition.name)
         partition_images_path.mkdir(parents=True, exist_ok=True)
-        partition_labels_path = labels_path.joinpath(partition.name)
+        partition_labels_path = self.labels_path.joinpath(partition.name)
         partition_labels_path.mkdir(parents=True, exist_ok=True)
         # Get the images and annotations for the partition
         images = partition.get_images()
         annotations = partition.get_annotations()
 
+        # Setup & fill images with annotations dictionary
         images_with_annotations: Dict[int, List[DatasetAnnotation]] = {}
-
         for image in images.values():
             # Create an empty list for images with annotations
             images_with_annotations[image.id] = []
-
         for annotation in annotations:
             # Get the image ID from the annotation
             image_id = annotation.image.id
             # Append the annotation to the list of annotations for the image
             images_with_annotations[image_id].append(annotation)
 
-        for image_with_annotations in images_with_annotations:
+        # Copy images and write labels
+        for image_with_annotations in track(
+            images_with_annotations,
+            description="[white]Copying images and writing labels[/white]"
+        ):
             # Copy the image to the partition images path
             image = images[image_with_annotations]
             # Construct a new file name using the image ID and the original

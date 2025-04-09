@@ -64,6 +64,7 @@ class DatasetAnnotation:
 
 
 class DatasetPartition:
+    name: str
     image_dir: Path
     annotation_file: Path
 

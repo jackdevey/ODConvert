@@ -7,7 +7,7 @@ import shutil
 import fire
 import ODConvert.core
 
-from ODConvert.converters.yolo import convert_to_yolo
+from ODConvert.converters import YOLOConverter
 
 
 def convert(path: str, to_type: str):
@@ -71,4 +71,9 @@ def convert(path: str, to_type: str):
             raise fire.core.Fire(
                 f"Output directory {output_dir} already exists. ")
 
-    convert_to_yolo(dataset, output_dir)
+    print()  # Spacing
+
+    YOLOConverter(dataset, to_type, output_dir).convert()
+    print()  # Spacing
+    print("[green bold]:white_heavy_check_mark: "
+          "Conversion completed successfully![/green bold]")
