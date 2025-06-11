@@ -1,11 +1,12 @@
 from pathlib import Path
-from ODConvert.core import DatasetPartition, DatasetAnnotation, DatasetClass
-from ODConvert.core import DatasetImage, BoundingBox, DatasetHandler
+from ODConvert.core import DatasetAnnotation, DatasetClass
+from ODConvert.core import DatasetImage, BoundingBox
 from ODConvert.core import DatasetType
 import json
 from typing import List
 from uuid import uuid4
 
+from ODConvert.handlers.base import DatasetHandler, DatasetPartitionHandler
 
 class COCODatasetHandler(DatasetHandler):
 
@@ -26,7 +27,7 @@ class COCODatasetHandler(DatasetHandler):
         super().__init__(DatasetType.COCO, classes, partitions)
 
     def __find_partitions(self):
-        partitions: List[DatasetPartition] = []
+        partitions: List[DatasetPartitionHandler] = []
         # COCO datasets should provide annotations for each
         # partition in the /annotations directory
         if (self.dir / "annotations").exists():
@@ -37,12 +38,13 @@ class COCODatasetHandler(DatasetHandler):
                     # typically this comes after the last underscore
                     name = item.stem.split(
                         "_")[-1] or f"unknown-{str(uuid4())[:8]}"
-                    # Create new COCODatasetPartition object
+                    # Create new COCODatasetPartitionHandler object
                     # and append it to the list of partitions
-                    partitions.append(COCODatasetPartition(
+                    partitions.append(COCODatasetPartitionHandler(
                         name=name,
                         image_dir=self.dir / "images",
-                        annotation_file=item
+                        annotation_file=item,
+                        parent=self
                     ))
         # TODO: Add support for occurences where annotations
         # are stored with images in the partition directories.
@@ -65,41 +67,18 @@ class COCODatasetHandler(DatasetHandler):
         # return partitions
 
 
-class COCODatasetPartition(DatasetPartition):
+class COCODatasetPartitionHandler(DatasetPartitionHandler):
 
-    def __init__(self, name, image_dir: Path, annotation_file: Path):
+    def __init__(self, name, image_dir: Path, annotation_file: Path, parent: DatasetHandler):
         self.name = name
         self.image_dir = image_dir
         self.annotation_file = annotation_file
         # Load the annotation file and parse it as JSON
         self.raw = json.loads(open(annotation_file, "r").read())
-        # Load classes, images and annotations into memory
-        self.__classes = self.get_classes()
-        self.__images = self.get_images()
-        self.__annotations = self.get_annotations()
+        # Initialise the base DatasetPartition class
+        super().__init__(name, parent)
 
-    def get_class(self, id: int) -> DatasetClass | None:
-        """
-        Get a class by its ID.
-        :param id: The ID of the class.
-        :return: DatasetClass object
-        """
-        # Load classes if not already loaded
-        if self.__classes is None:
-            self.__classes = self.get_classes()
-        # Search for the class with the given ID
-        for cls in self.__classes:
-            if cls.id == id:
-                return cls
-        # If not found, return None
-        return None
-
-    def get_classes(self):
-        # Check if classes are already loaded
-        # and return them if so
-        if getattr(self, "__classes", None) is not None:
-            return self.__classes
-
+    def find_classes(self):
         return [
             # Construct DatasetClass object
             DatasetClass(
@@ -108,15 +87,10 @@ class COCODatasetPartition(DatasetPartition):
                 parent=None
             )
             # for all categories in the raw data
-            for category in self.raw["categories"]]
+            for category in self.raw["categories"]
+        ]
 
-    def get_images(self):
-        # Check if images are already loaded,
-        # and return them if so
-        if getattr(self, "__images", None) is not None:
-            print("DBG: Using cached images")
-            return self.__images
-
+    def find_images(self):
         return {
             image["id"]: DatasetImage(
                 id=image["id"],
@@ -125,14 +99,20 @@ class COCODatasetPartition(DatasetPartition):
             for image in self.raw["images"]
         }
 
-    def get_image(self, id: int):
-        return self.__images[id]
+    def get_class(self, id: int) -> DatasetClass | None:
+        """
+        Get a class by its ID.
+        :param id: The ID of the class.
+        :return: DatasetClass object
+        """
+        # Search for the class with the given ID
+        for cls in self.get_classes():
+            if cls.id == id:
+                return cls
+        # If not found, return None
+        return None
 
-    def get_annotations(self):
-        # Check if annotations are already loaded,
-        # and return them if so
-        if getattr(self, "__annotations", None) is not None:
-            return self.__annotations
+    def find_annotations(self):
 
         def construct_annotation(annotation):
             # Lookup class by ID

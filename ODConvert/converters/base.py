@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
-from ODConvert.core import DatasetHandler, DatasetType, DatasetPartition
+from ODConvert.core import DatasetType
+from ODConvert.handlers.base import DatasetHandler, DatasetPartitionHandler
+
+
 from typing import final
 from pathlib import Path
 from rich import print
@@ -52,5 +55,5 @@ class DatasetConverter(ABC):
             self.convert_partition(partition)
 
     @abstractmethod
-    def convert_partition(self, partition: DatasetPartition):
+    def convert_partition(self, partition: DatasetPartitionHandler):
         pass

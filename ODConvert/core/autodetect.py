@@ -1,4 +1,4 @@
-from ODConvert.core import DatasetHandler, DatasetType
+from ODConvert.handlers.base import DatasetHandler
 from pathlib import Path
 
 

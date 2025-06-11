@@ -36,7 +36,7 @@ def inspect(path: str):
     print(f"[bold]Detected {len(dps)} partitions:[/bold]")
     print(Columns(
         [
-            f"[magenta]{dp.name}[/magenta] → {dp.stats()[0]}"
+            f"[magenta]{dp.name}[/magenta] → {dp.stats()[0]} "
             f"images and {dp.stats()[1]} annotations" for dp in dps
         ],
     ))
