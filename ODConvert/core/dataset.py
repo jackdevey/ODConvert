@@ -49,7 +49,6 @@ class DatasetClass:
     parent: Optional["DatasetClass"] = None
 
 
-@dataclass(frozen=True)
 class DatasetImage:
     id: int | None
     path: Path
