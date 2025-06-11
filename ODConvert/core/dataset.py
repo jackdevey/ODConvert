@@ -49,18 +49,14 @@ class DatasetClass:
     parent: Optional["DatasetClass"] = None
 
 
+@dataclass(frozen=True)
 class DatasetImage:
     id: int | None
     path: Path
-    height: int
-    width: int
 
-    def __init__(self, id: int | None, path: Path):
-        self.id = id
-        self.path = path
-        # Read the image and get the height and width
-        img = cv2.imread(str(path))
-        self.height, self.width, _ = img.shape
+    def get_shape(self) -> tuple[int, int]:
+        img = cv2.imread(str(self.path))
+        return img.shape[:2]
 
 
 @dataclass(frozen=True)
