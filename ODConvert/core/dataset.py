@@ -58,9 +58,8 @@ class DatasetImage:
     def __init__(self, id: int | None, path: Path):
         self.id = id
         self.path = path
-        print(path)
         # Read the image and get the height and width
-        img = cv2.imread("./"+str(path))
+        img = cv2.imread(str(path))
         self.height, self.width, _ = img.shape
         # Close the image
         img.close()
