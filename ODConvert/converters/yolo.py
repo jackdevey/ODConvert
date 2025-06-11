@@ -62,5 +62,7 @@ class YOLOConverter(DatasetConverter):
                     bbox = annot.bbox
                     # Write the annotation to the file
                     f.write(
-                        f"{cls_id} {bbox.x_center} {bbox.y_center} "
-                        f"{bbox.width} {bbox.height}\n")
+                        f"{cls_id} {bbox.x_center / image.width} "
+                        f"{bbox.y_center / image.height} "
+                        f"{bbox.width / image.width} "
+                        f"{bbox.height / image.height}\n")
