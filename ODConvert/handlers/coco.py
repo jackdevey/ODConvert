@@ -8,6 +8,7 @@ from uuid import uuid4
 
 from ODConvert.handlers.base import DatasetHandler, DatasetPartitionHandler
 
+
 class COCODatasetHandler(DatasetHandler):
 
     def __init__(self, dir: Path):
@@ -42,7 +43,7 @@ class COCODatasetHandler(DatasetHandler):
                     # and append it to the list of partitions
                     partitions.append(COCODatasetPartitionHandler(
                         name=name,
-                        image_dir=self.dir / "images",
+                        image_dir=self.dir / "images" / name,
                         annotation_file=item,
                         parent=self
                     ))
