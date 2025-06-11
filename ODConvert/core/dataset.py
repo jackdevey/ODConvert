@@ -3,6 +3,8 @@ from typing import Optional
 from pathlib import Path
 from enum import Enum
 
+import cv2
+
 from ODConvert.core import BoundingBox
 
 
@@ -51,6 +53,17 @@ class DatasetClass:
 class DatasetImage:
     id: int | None
     path: Path
+    height: int
+    width: int
+
+    def __init__(self, id: int | None, path: Path):
+        self.id = id
+        self.path = path
+        # Read the image and get the height and width
+        img = cv2.imread(str(path))
+        self.height, self.width = img.shape[:2]
+        # Close the image
+        img.close()
 
 
 @dataclass(frozen=True)
