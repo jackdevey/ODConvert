@@ -44,8 +44,8 @@ class YOLOConverter(DatasetConverter):
         ):
             # Copy the image to the partition images path
             image = images[image_with_annotations]
-            # Get the width & height of the image
-            width, height = image.get_shape()
+            # Get the height & width of the image
+            height, width = image.get_shape()
             # Construct a new file name using the image ID and the original
             # file extension
             new_file_name = f"{image.id}{image.path.suffix}"
