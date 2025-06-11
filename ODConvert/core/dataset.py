@@ -3,6 +3,8 @@ from typing import Optional
 from pathlib import Path
 from enum import Enum
 
+import cv2
+
 from ODConvert.core import BoundingBox
 
 
@@ -51,6 +53,10 @@ class DatasetClass:
 class DatasetImage:
     id: int | None
     path: Path
+
+    def get_shape(self) -> tuple[int, int]:
+        img = cv2.imread(str(self.path))
+        return img.shape[:2]
 
 
 @dataclass(frozen=True)
