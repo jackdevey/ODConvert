@@ -61,8 +61,6 @@ class DatasetImage:
         # Read the image and get the height and width
         img = cv2.imread(str(path))
         self.height, self.width, _ = img.shape
-        # Close the image
-        img.close()
 
 
 @dataclass(frozen=True)
