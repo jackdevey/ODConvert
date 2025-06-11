@@ -44,6 +44,8 @@ class YOLOConverter(DatasetConverter):
         ):
             # Copy the image to the partition images path
             image = images[image_with_annotations]
+            # Get the width & height of the image
+            width, height = image.get_shape()
             # Construct a new file name using the image ID and the original
             # file extension
             new_file_name = f"{image.id}{image.path.suffix}"
@@ -62,7 +64,7 @@ class YOLOConverter(DatasetConverter):
                     bbox = annot.bbox
                     # Write the annotation to the file
                     f.write(
-                        f"{cls_id} {bbox.x_center / image.width} "
-                        f"{bbox.y_center / image.height} "
-                        f"{bbox.width / image.width} "
-                        f"{bbox.height / image.height}\n")
+                        f"{cls_id} {bbox.x_center / width} "
+                        f"{bbox.y_center / height} "
+                        f"{bbox.width / width} "
+                        f"{bbox.height / height}\n")
