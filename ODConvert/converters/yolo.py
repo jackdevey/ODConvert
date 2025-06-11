@@ -68,3 +68,23 @@ class YOLOConverter(DatasetConverter):
                         f"{bbox.y_center / height} "
                         f"{bbox.width / width} "
                         f"{bbox.height / height}\n")
+
+    def final_steps(self) -> None:
+        # Get all classes from the dataset
+        classes = self.dataset.get_classes()
+        # Get all partitions from the dataset
+        partitions = self.dataset.get_partitions()
+        # Create the data.yaml file
+        with open(self.path.joinpath("data.yaml"), "w") as f:
+            # Write the paths to the dataset
+            f.write(f"path: {self.path.absolute()}\n")
+            # Write paths for each partition
+            for partition in partitions:
+                f.write(f"{partition.name}: images/{partition.name}\n")
+            f.write("\n")
+            # Write the number of classes
+            f.write(f"nc: {len(classes)}\n\n")
+            # Write the class names
+            f.write("names:\n")
+            for cls in classes:
+                f.write(f"  - {cls.name}\n")

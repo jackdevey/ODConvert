@@ -53,7 +53,13 @@ class DatasetConverter(ABC):
                 "[/bold]")
             # Convert each partition
             self.convert_partition(partition)
+        # Call final steps
+        self.final_steps()
 
     @abstractmethod
     def convert_partition(self, partition: DatasetPartitionHandler):
+        pass
+
+    @abstractmethod
+    def final_steps(self) -> None:
         pass
