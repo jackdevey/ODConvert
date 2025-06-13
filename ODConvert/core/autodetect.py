@@ -8,8 +8,6 @@ def autodetect(path: Path) -> DatasetHandler:
         raise FileNotFoundError(
             f"Specified path: {path} does not exist or is not a directory.")
 
-    items = [item for item in path.iterdir()]
-
     # Check for a COCO dataset by looking for a directory named "annotations"
     # that contains any .json files
     for item in path.iterdir():
@@ -21,5 +19,5 @@ def autodetect(path: Path) -> DatasetHandler:
                 return COCODatasetHandler(path)
 
     raise TypeError(
-        "Unable to detect dataset type. Please specify the dataset type manually."
+        "Unable to detect dataset type. Please specify the dataset type."
     )
